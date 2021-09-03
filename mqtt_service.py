@@ -21,4 +21,3 @@ def subscribe(socket, network):
         mqtt_service.subscribe(feed, 1)
 
     return mqtt_service
-    
