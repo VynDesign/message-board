@@ -1,5 +1,6 @@
 from adafruit_display_shapes.rect import Rect
 from adafruit_display_shapes.polygon import Polygon
+import displayio
 
 def caution(color):
     border = []
@@ -159,4 +160,7 @@ def caution(color):
         (62, 31), (64, 31)
     ], outline=color))
 
-    return border
+    border_group = displayio.Group()
+    for item in border:
+        border_group.append(item)
+    return border_group
