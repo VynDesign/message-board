@@ -1,3 +1,3 @@
 feeds = {
-    'blah': 'blah/blah/blah'
+    'feed1': 'name/of/your/MQTT/topic'
 }
