@@ -33,32 +33,23 @@ The list of libraries in that bundle needed to run the code in this repo is:
 ## Configuration - Home Assistant
 First, install and configure the Mosquitto Broker add-on for HomeAssistant if you've not already done so.
 
-Next, we will configure two scripts in Home Assistant - one to send a message, and another to send the opposite of that message. Basically, the 'On' and 'Off' state of the board.
-Create a pair of scripts that send a message - in this example "On a Call" or "Not On a Call", and an appropriate action - "on", or "off". These message/action payloads are 
-published to the topic "homeassistant/message-board/1/meeting":
+Next, we will configure a script in Home Assistant that is intended to send a message to our MQTT service to a topic that begins with "home-assistant/message-board/" and allows for variables to be passed for the "board_number" and "topic_name", and a payload that contains a "message" and "mode" variable. These variables will be passed to the script from another entity.
 
 ```
-mqtt_in_a_meeting_on:
-  alias: Publish "On a Call" notification
+publish_notification_to_message_board:
+  alias: Publish a message and action notification to a message board
   sequence:
   - service: mqtt.publish
     data:
-      topic: home-assistant/message-board/1/meeting
-      payload: '{ "message": "On a Call", "action": "on" }'
+      topic: >
+        home-assistant/message-board/{{board_number}}/{{topic_name}}
+      payload: >
+        { "message": "{{message}}", "action": "{{mode}}" }
   mode: single
-mqtt_in_a_meeting_off:
-  alias: Publish "Not On a Call" notification
-  sequence:
-  - service: mqtt.publish
-    data:
-      topic: home-assistant/message-board/1/meeting
-      payload: '{ "message": "Not On a Call", "action": "off" }'
-  mode: single
+
 ```
 
-The 'message' of the payload is what gets displayed on the LED Matrix, and the 'action' determines whether or not Matrix is lit - "on" makes it show the border and text, "off" hides them. 
-You could send the action "on" for both states, which would mean that one message would be shown or the other would be shown. I have mine simply turning off when I am "Not On a Call". 
-Save these scripts to whatever file that houses other scripts in your Home Assistant instance. By default, I believe it is simply /config/scripts.yaml
+Save this script to whatever file that houses other scripts in your Home Assistant instance. By default, I believe it is simply /config/scripts.yaml
 
 Then, we will configure two entities in Home Assistant:
 * An "input boolean" that will be used to track the 'state' of our message board; and
@@ -85,15 +76,26 @@ Then, create a new file called "/config/switch.yaml" (if it does not already exi
       turn_on:
         - service: input_boolean.turn_on
           entity_id: input_boolean.in_a_meeting
-        - service: script.mqtt_in_a_meeting_on
+        - service: script.publish_notification_to_message_board
+          data:
+            board_number: 1
+            topic_name: meeting
+            message: On a Call
+            mode: "on"
       turn_off:
         - service: input_boolean.turn_off
           entity_id: input_boolean.in_a_meeting
-        - service: script.mqtt_in_a_meeting_off
+        - service: script.publish_notification_to_message_board
+          data:
+            board_number: 1
+            topic_name: meeting
+            message: Not on a Call
+            mode: "off"
+
 ```
 
-Basically, what this switch does, is toggle the 'state' of our 'in_a_meeting' input_boolean, and trigger the appropriate script for that 'state'. This switch will now be available 
-on the Home Assistant UI dashboards as an entity card.
+Basically, what this switch does is toggle the 'state' of our 'in_a_meeting' input_boolean, and trigger the script for that 'state'. The 'message' of the payload is what gets displayed on the LED Matrix, and the 'action' determines whether or not the Matrix is lit - "on" makes it show the border and text, "off" hides them. 
+You could send the action "on" for both states, which would mean that one message would be shown or the other would be shown. I have mine simply turning off when I am "Not On a Call". This switch will now be available on the Home Assistant UI dashboards as an entity card.
 
 ## Configuration - MatrixPortal
 The code running on the MatrixPortal was written to be configurable in two ways. There is a 'secrets.py' file which is intended to house sensitive information like your WiFi credentials
