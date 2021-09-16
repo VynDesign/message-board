@@ -3,8 +3,12 @@
 Create an LED message display board that is connected to an MQTT broker to show variable message text and a border. In my personal use case, since I work from home full-time, I 
 wanted a way to alert my family members that I was unavailable due to being in a virtual meeting/phone call.
 
-In my setup, the MQTT broker is the Mosquitto broker add-on for an existing Home Assistant instance, but theoretically any MQTT broker and host could be made to work. I have only 
-tested this with HomeAssistant, however.
+In my setup, the MQTT broker is the Mosquitto broker add-on for an existing Home Assistant instance, but theoretically any MQTT broker and host could be made to work. I have only tested this with HomeAssistant, however.
+
+## See it in action!
+Click the image below to see a demonstration video!
+
+[![On A Call - on and off](https://img.youtube.com/vi/tQ6rET4MDKc/0.jpg)](https://www.youtube.com/watch?v=tQ6rET4MDKc)
 
 ## MatrixPortal Setup
 
