@@ -129,3 +129,36 @@ feeds = {
     'meetings': 'home-assistant/message-board/1/meeting'
 }
 ```
+
+## Bonus Points - MS Teams integration
+
+Using this awesome script that can detect status and activity changes in Microsoft Teams and send those changes to Home Assistant (https://github.com/EBOOZ/TeamsStatus), I've successfully automated flipping the "On a Call" switch based on my MS Teams activity. Follow the instructions on that page to get the script working and the base HA configurations necessary to acknowledge the status and activity, then add the following automations (I used the UI to create them, but you can copy and paste these directly into the automations.yaml file, or replicate them in the UI):
+
+```
+- id: '{{something_unique}}'
+  alias: MS Teams - In a call
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.teams_activity
+    to: In a call
+  condition: []
+  action:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.in_a_meeting
+  mode: single
+- id: '{{something_unique}}'
+  alias: MS Teams - Not in a call
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.teams_activity
+    to: Not in a call
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.in_a_meeting
+  mode: single
+```
