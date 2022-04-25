@@ -35,7 +35,7 @@ The list of libraries in that bundle needed to run the code in this repo is:
 * neopixel.mpy
 
 ## Configuration - Home Assistant
-First, install and configure the Mosquitto Broker add-on for HomeAssistant if you've not already done so.
+First, install and configure the Mosquitto Broker add-on for HomeAssistant if you've not already done so. See https://www.home-assistant.io/integrations/mqtt/
 
 Next, we will configure a script in Home Assistant that is intended to send a message to our MQTT service to a topic that begins with "home-assistant/message-board/" and allows for variables to be passed for the "board_number" and "topic_name", and a payload that contains a "message" and "mode" variable. These variables will be passed to the script from another entity.
 
