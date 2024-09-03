@@ -1,72 +1,45 @@
-import board
-import displayio
-import terminalio
 import json
-from adafruit_display_text import label
-from adafruit_bitmap_font import bitmap_font
-from adafruit_matrixportal.matrixportal import MatrixPortal
-import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 
 import borders
 import mqtt_service
+import matrixportal_service
 
-def center_label(label: label.Label):
-    bbx, bby, bbwidth, bbh = label.bounding_box
-    # Center the label
-    label.x = round(display.width / 2 - bbwidth / 2)
-    label.y = display.height // 2
+print('     MatrixPortal Message Board')
 
 last_data = {}
-bitmap = displayio.Bitmap(64, 32, 2)  # Create a bitmap object,width, height, bit depth
 
-# --- Display setup ---
-matrixportal = MatrixPortal(status_neopixel=board.NEOPIXEL, debug=False)
+matrixportal = matrixportal_service.create_matrixportal()
 display = matrixportal.display
-color = displayio.Palette(3)  # Create a color palette
-color[0] = 0x000000  # black background
-color[1] = 0xFF0000  # red
-color[2] = 0xCC4000  # amber
-
-# Create a TileGrid using the Bitmap and Palette
-tile_grid = displayio.TileGrid(bitmap, pixel_shader=color)
-
-parent_group = displayio.Group()  # Create a Group
-parent_group.append(tile_grid)  # Add the TileGrid to the Group
-
-message_label = label.Label(terminalio.FONT, text='Connecting', color=color[2])
-center_label(message_label)
-parent_group.append(message_label)
+network = matrixportal.network
+colors = matrixportal_service.set_colors()
+parent_group = matrixportal_service.create_grid(colors)
+message_label = matrixportal_service.create_text_label(colors[2], parent_group, display)
+border_group = borders.caution(colors[2])
+border_group.hidden = True
+parent_group.append(border_group)
 display.show(parent_group)
 
-network = matrixportal.network
+matrixportal_service.set_label_text(message_label, 'Connecting', colors[2], display, False)
+
 network.connect()
 if (network._wifi.is_connected):
     message_label.hidden = True
     print('Connected to wifi')
-
-border_group = borders.caution(color[2])
-border_group.hidden = True
-parent_group.append(border_group)
 
 def message_received(client, topic, message):
     print('Received {} for {}'.format(message, topic))
     last_data[topic] = message
     payload = json.loads(message)
     action = payload.get('action')
-
-    if (action == 'on'):
-        message_label.text = payload.get('message')
-        message_label.color = color[1]
-        center_label(message_label)
-        message_label.hidden = False
-        border_group.hidden = False
-    else:
-        message_label.hidden = True
-        border_group.hidden = True
+    hide = action != 'on'
+    text = '' if hide else payload.get('message')
+    matrixportal_service.set_label_text(message_label, text, colors[1], display, hide)
+    border_group.hidden = hide
+    parent_group.hidden = hide
 
 # --- MQTT setup ---
-queue = mqtt_service.subscribe(socket, network)
+queue = mqtt_service.subscribe(network._wifi.esp)
 queue.on_message = message_received
 
 # --- main loop ---

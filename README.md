@@ -130,7 +130,11 @@ feeds = {
 }
 ```
 
-## Bonus Points - MS Teams integration
+## Bonus Points = MS Teams integration (New)
+
+The previous usage of the script (https://github.com/EBOOZ/TeamsStatus) that reads the log files for status changes no longer works with the latest version of "New Microsoft Teams". I'm currently using the awesome (https://github.com/geoffreylagaisse/Hass-Microsoft-Graph) Micorsoft Graph API HACS integration. This requires access to the MS Graph API which may be hard to achieve depending on your organization's security policies.
+
+## Bonus Points - MS Teams integration (Old - for posterity)
 
 Using this awesome script that can detect status and activity changes in Microsoft Teams and send those changes to Home Assistant (https://github.com/EBOOZ/TeamsStatus), I've successfully automated flipping the "On a Call" switch based on my MS Teams activity. Follow the instructions on that page to get the script working and the base HA configurations necessary to acknowledge the status and activity, then add the following automations (I used the UI to create them, but you can copy and paste these directly into the automations.yaml file, or replicate them in the UI):
 
